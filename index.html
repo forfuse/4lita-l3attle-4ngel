@@ -1,260 +1,84 @@
-<!DOCTYPE html><html lang="th">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>ระบบเลือกสินค้า</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f9f9f9;
-      padding: 30px;
-      max-width: 700px;
-      margin: auto;
-    }h2, h3 {
-  color: #4A4A4A;
-}
-
-select, input, button {
-  padding: 10px;
-  font-size: 16px;
-  width: 100%;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-button {
-  background-color: #6200ea;
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-button:hover {
-  background-color: #3700b3;
-}
-
-.cart-item {
-  background: #fff;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.qty-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.qty-control button {
-  width: 30px;
-  padding: 5px;
-  font-size: 18px;
-}
-
-.qty-control input {
-  width: 50px;
-  text-align: center;
-  padding: 5px;
-}
-
-canvas {
-  width: 100%;
-  height: 150px;
-  border: 1px solid #ccc;
-  margin-top: 10px;
-  border-radius: 6px;
-  background: #fff;
-}
-
-.cart-review {
-  background: #e3f2fd;
-  padding: 15px;
-  margin-top: 10px;
-  border-radius: 6px;
-}
-
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-field {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .submit-button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .submit-button:hover {
+      background-color: #45a049;
+    }
+    .error-message {
+      color: red;
+      text-align: center;
+      display: none;
+    }
   </style>
 </head>
-<body>  <h2>ระบบเลือกสินค้า</h2>
-  <select id="itemSelect"><option>-- กำลังโหลดสินค้า --</option></select>
-  <div class="qty-control">
-    <button onclick="adjustInitialQty(-1)">-</button>
-    <input type="number" id="quantity" placeholder="จำนวน" min="1" value="1" />
-    <button onclick="adjustInitialQty(1)">+</button>
+<body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="text" id="username" class="input-field" placeholder="Username" required>
+      <input type="password" id="password" class="input-field" placeholder="Password" required>
+      <button type="button" class="submit-button" onclick="login()">Login</button>
+      <p class="error-message" id="errorMessage">Invalid username or password</p>
+    </form>
   </div>
-  <button onclick="addToCart()">เพิ่มลงตะกร้า</button>  <div id="orderList">
-    <h3>ตะกร้าสินค้า</h3>
-    <div id="cartItems"></div>
-    <p id="cartTotal"></p>
-    <button onclick="showCartReview()">ตรวจสอบรายการสั่งซื้อ</button>
-    <div id="cartReview" class="cart-review" style="display:none;"></div>
-  </div>  <h3>ข้อมูลผู้สั่งซื้อ</h3>
-  <input type="text" id="name" placeholder="ชื่อผู้สั่งซื้อ" />
-  <input type="email" id="email" placeholder="อีเมล" />
-  <input type="text" id="phone" placeholder="เบอร์โทรศัพท์" />
-  <input type="text" id="department" placeholder="หน่วยงาน/แผนก" />
-  <p>เซ็นชื่อ:</p>
-  <canvas id="signatureCanvas"></canvas>
-  <button onclick="clearSignature()">ล้างลายเซ็น</button><button onclick="submitOrder()">ยืนยันการสั่งซื้อ</button>
 
   <script>
-    let cart = [];
-    let productList = [];
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
 
-    const itemSelect = document.getElementById("itemSelect");
-    const quantityInput = document.getElementById("quantity");
-    const cartItemsDiv = document.getElementById("cartItems");
-    const cartTotal = document.getElementById("cartTotal");
-    const cartReview = document.getElementById("cartReview");
-
-    fetch("https://script.google.com/macros/s/AKfycbw2spCGpwsMqflu-yr5r3Tppk33Py9OeWWyrhO7MOw8RP4w0FEc904OGXcxWuHxoFaaxQ/exec")
-      .then(res => res.json())
-      .then(data => {
-        productList = data;
-        itemSelect.innerHTML = '<option value="">-- เลือกสินค้า --</option>';
-        data.forEach((item, i) => {
-          const option = document.createElement("option");
-          option.value = i;
-          option.textContent = `${item.name} - ${item.price} บาท`;
-          itemSelect.appendChild(option);
-        });
-      });
-
-    function adjustInitialQty(delta) {
-      const newVal = parseInt(quantityInput.value || 1) + delta;
-      quantityInput.value = Math.max(1, newVal);
+      google.script.run.withSuccessHandler(handleLoginResponse).doLogin(username, password);
     }
 
-    function addToCart() {
-      const index = itemSelect.value;
-      const quantity = parseInt(quantityInput.value);
-      if (index === "" || quantity < 1) return alert("กรุณาเลือกสินค้าให้ถูกต้อง");
-      const item = productList[index];
-      cart.push({ name: item.name, price: item.price, quantity });
-      quantityInput.value = "1";
-      renderCart();
-    }
-
-    function renderCart() {
-      cartItemsDiv.innerHTML = "";
-      let total = 0;
-
-      cart.forEach((item, index) => {
-        total += item.price * item.quantity;
-        const div = document.createElement("div");
-        div.className = "cart-item";
-        div.innerHTML = `
-          <span>${item.name} (${item.price} บาท)</span>
-          <div class="qty-control">
-            <button onclick="changeQty(${index}, -1)">-</button>
-            <input type="number" value="${item.quantity}" min="1"
-              onchange="updateQty(${index}, this.value)" />
-            <button onclick="changeQty(${index}, 1)">+</button>
-          </div>
-          <button onclick="removeItem(${index})">ลบ</button>
-        `;
-        cartItemsDiv.appendChild(div);
-      });
-
-      cartTotal.textContent = `รวมทั้งหมด: ${total} บาท`;
-    }
-
-    function updateQty(index, value) {
-      const qty = parseInt(value);
-      if (qty > 0) {
-        cart[index].quantity = qty;
-        renderCart();
+    function handleLoginResponse(response) {
+      if (response.status === 'success') {
+        // Redirect to the home page or dashboard
+        window.location.href = 'home.html';
+      } else {
+        // Display error message
+        document.getElementById('errorMessage').style.display = 'block';
       }
     }
-
-    function changeQty(index, delta) {
-      const newQty = cart[index].quantity + delta;
-      if (newQty > 0) {
-        cart[index].quantity = newQty;
-        renderCart();
-      }
-    }
-
-    function removeItem(index) {
-      cart.splice(index, 1);
-      renderCart();
-    }
-
-    function showCartReview() {
-      if (cart.length === 0) return alert("ยังไม่มีสินค้าในตะกร้า");
-      let summary = "<strong>รายการสั่งซื้อ:</strong><ul>";
-      let total = 0;
-      cart.forEach(item => {
-        summary += `<li>${item.name} x ${item.quantity} = ${item.price * item.quantity} บาท</li>`;
-        total += item.price * item.quantity;
-      });
-      summary += `</ul><strong>รวม: ${total} บาท</strong>`;
-      cartReview.innerHTML = summary;
-      cartReview.style.display = "block";
-    }
-
-    const canvas = document.getElementById("signatureCanvas");
-    const ctx = canvas.getContext("2d");
-    let drawing = false;
-
-    canvas.addEventListener("mousedown", () => drawing = true);
-    canvas.addEventListener("mouseup", () => {
-      drawing = false;
-      ctx.beginPath();
-    });
-    canvas.addEventListener("mousemove", draw);
-
-    function draw(e) {
-      if (!drawing) return;
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#000";
-      ctx.lineTo(e.offsetX, e.offsetY);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(e.offsetX, e.offsetY);
-    }
-
-    function clearSignature() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function submitOrder() {
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
-      const phone = document.getElementById("phone").value;
-      const department = document.getElementById("department").value;
-      const signature = canvas.toDataURL();
-
-      if (!name || !email || !phone || !department || cart.length === 0) {
-        return alert("กรุณากรอกข้อมูลให้ครบ");
-      }
-
-      fetch("https://script.google.com/macros/s/AKfycbw2spCGpwsMqflu-yr5r3Tppk33Py9OeWWyrhO7MOw8RP4w0FEc904OGXcxWuHxoFaaxQ/exec", {
-        method: "POST",
-        body: JSON.stringify({ name, email, phone, department, cart, signature }),
-        headers: { "Content-Type": "application/json" }
-      }).then(res => {
-        if (res.ok) {
-          alert("ส่งคำสั่งซื้อสำเร็จ!");
-          cart = [];
-          renderCart();
-          document.getElementById("name").value = "";
-          document.getElementById("email").value = "";
-          document.getElementById("phone").value = "";
-          document.getElementById("department").value = "";
-          clearSignature();
-          cartReview.innerHTML = "";
-          cartReview.style.display = "none";
-        }
-      });
-    }
-  </script></body>
+  </script>
+</body>
 </html>
