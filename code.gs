@@ -1,6 +1,6 @@
 // ฟังก์ชันที่ทำงานเมื่อมีการร้องขอ GET เพื่อแสดงหน้า HTML
 function doGet(e) {
-  return HtmlService.createHtmlOutputFromFile('https://script.google.com/macros/s/AKfycbz5yOsCP50PRRI4M8hcAtgMQfMJ_thInLbSv6l0fXxU4-ZJKL5JZZW_VFkPFGwn9DMnpw/exec'); // เปลี่ยน 'index' เป็นชื่อไฟล์ HTML ของคุณ
+  return HtmlService.createHtmlOutputFromFile('https://forfuse.github.io/TEST/'); // เปลี่ยน 'index' เป็นชื่อไฟล์ HTML ของคุณ
 }
 
 // ตัวอย่างฟังก์ชันที่เชื่อมต่อกับ Google Sheet
